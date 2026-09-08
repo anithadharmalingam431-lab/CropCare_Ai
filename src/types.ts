@@ -7,6 +7,7 @@ export interface PredictionResult {
   symptoms: string[];
   recommendation: string[];
   warning?: string | null;
+  reference_image?: string | null;
 }
 
 export interface PredictionRecord {

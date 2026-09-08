@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+const REFERENCE_IMAGE = "/crop-disease-reference.webp";
+
 const DISEASE_CLASSES = [
   "Healthy",
   "Early Blight",
@@ -222,6 +224,7 @@ Deno.serve(async (req: Request) => {
         crop: info.crop, disease: info.disease, confidence: result.confidence,
         status: info.status, description: info.description,
         symptoms: info.symptoms, recommendation: info.recommendation,
+        reference_image: REFERENCE_IMAGE,
         warning: isLow ? "Low confidence prediction. The image may be unclear or the disease may not match known patterns. Consider consulting an agricultural expert." : null,
       });
     }

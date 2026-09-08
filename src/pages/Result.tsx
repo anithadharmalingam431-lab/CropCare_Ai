@@ -114,6 +114,17 @@ export default function Result() {
         </div>
       </div>
 
+      {/* Disease reference image */}
+      {result.reference_image && (
+        <div className="card p-5">
+          <h2 className="text-lg font-semibold text-brand-800 mb-3">Disease Reference</h2>
+          <div className="rounded-xl overflow-hidden bg-brand-50">
+            <img src={result.reference_image} alt="Crop disease reference" className="w-full max-h-72 object-cover" />
+          </div>
+          <p className="text-xs text-brand-500 mt-2">Use this reference image together with the symptoms listed below.</p>
+        </div>
+      )}
+
       {/* Description */}
       <div className="card p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-brand-800 mb-3">
