@@ -1,3 +1,2 @@
-# Supabase configuration
-# The edge function has been removed — the backend now runs as a
-# standalone Python FastAPI server (see backend/ directory).
+[functions.cropcare-api]
+verify_jwt = false

@@ -14,7 +14,7 @@ export async function predictDisease(imageFile: File): Promise<PredictionResult>
     let errorMessage = "Analysis failed. Please try again.";
     try {
       const errorBody = await response.json();
-      errorMessage = errorBody.detail || errorBody.error || errorMessage;
+      errorMessage = errorBody.error || errorBody.detail || errorMessage;
     } catch {
       // ignore parse error
     }
@@ -42,7 +42,7 @@ export async function savePrediction(
       disease: result.disease,
       confidence: result.confidence,
       status: result.status,
-      image_path: imageUrl,
+      image_url: imageUrl,
       description: result.description,
       symptoms: result.symptoms,
       recommendation: result.recommendation,
