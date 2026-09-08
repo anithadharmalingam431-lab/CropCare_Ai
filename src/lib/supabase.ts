@@ -5,5 +5,5 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Edge function base URL
-export const API_URL = `${supabaseUrl}/functions/v1/cropcare-api`;
+// Python backend API URL (FastAPI server)
+export const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8000";

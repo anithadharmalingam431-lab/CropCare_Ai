@@ -1,9 +1,9 @@
-import { API_URL } from "./supabase";
+import { API_URL, supabase } from "./supabase";
 import type { PredictionResult } from "../types";
 
 export async function predictDisease(imageFile: File): Promise<PredictionResult> {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await fetch(`${API_URL}/predict`, {
     method: "POST",
@@ -14,7 +14,7 @@ export async function predictDisease(imageFile: File): Promise<PredictionResult>
     let errorMessage = "Analysis failed. Please try again.";
     try {
       const errorBody = await response.json();
-      errorMessage = errorBody.error || errorMessage;
+      errorMessage = errorBody.detail || errorBody.error || errorMessage;
     } catch {
       // ignore parse error
     }
@@ -42,7 +42,7 @@ export async function savePrediction(
       disease: result.disease,
       confidence: result.confidence,
       status: result.status,
-      image_url: imageUrl,
+      image_path: imageUrl,
       description: result.description,
       symptoms: result.symptoms,
       recommendation: result.recommendation,
@@ -50,7 +50,22 @@ export async function savePrediction(
   });
 
   if (!response.ok) {
-    // Non-fatal — prediction still displayed, just not saved to history
     console.warn("Failed to save prediction to history");
   }
+}
+
+export async function fetchHistory() {
+  const response = await fetch(`${API_URL}/history`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load history.");
+  }
+
+  const data = await response.json();
+  return data.predictions ?? [];
+}
+
+export async function deletePrediction(id: string | number): Promise<void> {
+  const { error } = await supabase.from("predictions").delete().eq("id", id);
+  if (error) throw error;
 }

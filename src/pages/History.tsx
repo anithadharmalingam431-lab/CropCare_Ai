@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { History as HistoryIcon, Calendar, Leaf, Activity, TrendingUp, ChevronRight, Trash2, Loader2, AlertCircle, ScanLine } from "lucide-react";
-import { supabase } from "../lib/supabase";
+import { History as HistoryIcon, Calendar, Leaf, TrendingUp, ChevronRight, Trash2, Loader2, AlertCircle, ScanLine } from "lucide-react";
+import { fetchHistory, deletePrediction } from "../lib/api";
 import type { PredictionRecord } from "../types";
 
 export default function History() {
@@ -11,21 +11,15 @@ export default function History() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchHistory();
+    loadHistory();
   }, []);
 
-  const fetchHistory = async () => {
+  const loadHistory = async () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await supabase
-        .from("predictions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
-
-      if (fetchError) throw fetchError;
-      setRecords((data as PredictionRecord[]) ?? []);
+      const data = await fetchHistory();
+      setRecords(data as PredictionRecord[]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load history.");
     } finally {
@@ -33,10 +27,9 @@ export default function History() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     try {
-      const { error: deleteError } = await supabase.from("predictions").delete().eq("id", id);
-      if (deleteError) throw deleteError;
+      await deletePrediction(id);
       setRecords((prev) => prev.filter((r) => r.id !== id));
     } catch {
       setError("Failed to delete record.");
@@ -51,6 +44,10 @@ export default function History() {
   const formatTime = (iso: string) => {
     const d = new Date(iso);
     return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getImageUrl = (record: PredictionRecord): string | null => {
+    return record.image_url || record.image_path || null;
   };
 
   if (loading) {
@@ -69,7 +66,7 @@ export default function History() {
           <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <p className="text-sm text-red-700">{error}</p>
         </div>
-        <button onClick={fetchHistory} className="btn-secondary w-full">Try Again</button>
+        <button onClick={loadHistory} className="btn-secondary w-full">Try Again</button>
       </div>
     );
   }
@@ -99,19 +96,18 @@ export default function History() {
         <div className="space-y-3">
           {records.map((record) => {
             const isHealthy = record.status === "Healthy";
+            const img = getImageUrl(record);
             return (
               <div key={record.id} className="card-hover p-4 sm:p-5">
                 <div className="flex items-start gap-4">
-                  {/* Thumbnail */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-brand-50 shrink-0 flex items-center justify-center">
-                    {record.image_url ? (
-                      <img src={record.image_url} alt="Leaf" className="w-full h-full object-cover" />
+                    {img ? (
+                      <img src={img} alt="Leaf" className="w-full h-full object-cover" />
                     ) : (
                       <Leaf className="w-6 h-6 text-brand-300" />
                     )}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {isHealthy ? (
@@ -135,7 +131,6 @@ export default function History() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleDelete(record.id)}
@@ -157,7 +152,7 @@ export default function History() {
                               symptoms: record.symptoms ?? [],
                               recommendation: record.recommendation ?? [],
                             },
-                            imageUrl: record.image_url,
+                            imageUrl: img,
                           },
                         })
                       }

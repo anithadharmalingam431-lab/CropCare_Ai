@@ -10,12 +10,13 @@ export interface PredictionResult {
 }
 
 export interface PredictionRecord {
-  id: string;
+  id: string | number;
   crop: string;
   disease: string;
   confidence: number;
   status: string;
-  image_url: string | null;
+  image_url?: string | null;
+  image_path?: string | null;
   description: string | null;
   symptoms: string[] | null;
   recommendation: string[] | null;
